@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snake Game</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="hero">
+        <p class="eyebrow">Pure HTML, CSS, and JavaScript</p>
+        <h1>Snake</h1>
+      </header>
+
+      <section class="hud" aria-label="Game information">
+        <div class="score-panel">
+          <span class="label">Score</span>
+          <strong id="score" class="value">0</strong>
+        </div>
+        <p class="controls" id="controls-text">
+          Use the arrow keys or W A S D to guide the snake.
+        </p>
+      </section>
+
+      <section class="board-section" aria-label="Snake game board">
+        <div
+          id="game-board"
+          class="game-board"
+          role="grid"
+          aria-label="20 by 20 game board"
+        ></div>
+        <p id="status-message" class="status-message" aria-live="polite">
+          Press restart to initialize a new game.
+        </p>
+      </section>
+
+      <div class="actions">
+        <button id="restart-button" class="restart-button" type="button">
+          Restart Game
+        </button>
+      </div>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
