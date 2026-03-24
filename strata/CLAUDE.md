@@ -1,0 +1,1 @@
+@import .codepakt/CLAUDE.md

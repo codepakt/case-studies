@@ -1,0 +1,129 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const allCases = await getCollection("cases", ({ data }) => data.status !== "draft");
+const cases = allCases.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const allTags = [...new Set(cases.flatMap((c) => c.data.tags))].sort();
+const allDomains = [...new Set(cases.map((c) => c.data.domain))].sort();
+const allOutcomes = [...new Set(cases.map((c) => c.data.outcome))].sort();
+---
+
+<BaseLayout
+  title="Strata"
+  description="Archive of case studies documenting consequential decisions and how they changed over time."
+>
+  <section class="hero">
+    <p class="eyebrow">Editorial case study archive</p>
+    <h1>Document decisions, not just outcomes.</h1>
+    <p class="lede">
+      Strata is a narrative web app for preserving the context, tradeoffs, artifacts,
+      and revisions behind high-stakes product, engineering, research, and business decisions.
+    </p>
+  </section>
+
+  {cases.length > 0 && (
+    <section class="filters" aria-label="Filter and search">
+      <input
+        type="search"
+        id="search-input"
+        class="filter-search"
+        placeholder="Search case studies..."
+        aria-label="Search case studies"
+      />
+      <div class="filter-row">
+        <select id="filter-tag" class="filter-select" aria-label="Filter by tag">
+          <option value="">All tags</option>
+          {allTags.map((t) => <option value={t}>{t}</option>)}
+        </select>
+        <select id="filter-domain" class="filter-select" aria-label="Filter by domain">
+          <option value="">All domains</option>
+          {allDomains.map((d) => <option value={d}>{d}</option>)}
+        </select>
+        <select id="filter-outcome" class="filter-select" aria-label="Filter by outcome">
+          <option value="">All outcomes</option>
+          {allOutcomes.map((o) => <option value={o}>{o}</option>)}
+        </select>
+      </div>
+    </section>
+  )}
+
+  {cases.length > 0 ? (
+    <section class="archive" id="archive" aria-label="Case studies">
+      {cases.map((c) => (
+        <a
+          href={`/case/${c.id}/`}
+          class="card"
+          data-tags={c.data.tags.join(",")}
+          data-domain={c.data.domain}
+          data-outcome={c.data.outcome}
+          data-search={`${c.data.title} ${c.data.summary} ${c.data.premise ?? ""} ${c.data.tags.join(" ")} ${c.body ?? ""}`.toLowerCase()}
+        >
+          <div class="card__meta">
+            <time datetime={c.data.date.toISOString().slice(0, 10)}>
+              {c.data.date.toLocaleDateString("en-US", { year: "numeric", month: "short" })}
+            </time>
+            <span class="card__domain">{c.data.domain}</span>
+            <span class={`card__status card__status--${c.data.status}`}>{c.data.status}</span>
+            <span class={`card__outcome card__outcome--${c.data.outcome}`}>{c.data.outcome}</span>
+          </div>
+          <h2 class="card__title">{c.data.title}</h2>
+          {c.data.premise && <p class="card__premise">{c.data.premise}</p>}
+          <p class="card__summary">{c.data.summary}</p>
+          <ul class="card__tags">
+            {c.data.tags.map((tag) => (
+              <li>{tag}</li>
+            ))}
+          </ul>
+        </a>
+      ))}
+    </section>
+  ) : (
+    <section class="empty-state">
+      <p>No published case studies yet. Duplicate <code>CASE_TEMPLATE.mdx</code> to get started.</p>
+    </section>
+  )}
+
+  <p id="no-results" class="empty-state" hidden>No case studies match your filters.</p>
+</BaseLayout>
+
+<script>
+  const searchInput = document.getElementById("search-input") as HTMLInputElement | null;
+  const tagSelect = document.getElementById("filter-tag") as HTMLSelectElement | null;
+  const domainSelect = document.getElementById("filter-domain") as HTMLSelectElement | null;
+  const outcomeSelect = document.getElementById("filter-outcome") as HTMLSelectElement | null;
+  const archive = document.getElementById("archive");
+  const noResults = document.getElementById("no-results");
+
+  if (archive) {
+    const cards = Array.from(archive.querySelectorAll<HTMLAnchorElement>(".card"));
+
+    if (searchInput && tagSelect && domainSelect && outcomeSelect) {
+      function applyFilters() {
+        const query = searchInput!.value.toLowerCase().trim();
+        const tag = tagSelect!.value;
+        const domain = domainSelect!.value;
+        const outcome = outcomeSelect!.value;
+        let visible = 0;
+
+        for (const card of cards) {
+          const matchSearch = !query || (card.dataset.search ?? "").includes(query);
+          const matchTag = !tag || (card.dataset.tags ?? "").split(",").includes(tag);
+          const matchDomain = !domain || card.dataset.domain === domain;
+          const matchOutcome = !outcome || card.dataset.outcome === outcome;
+          const show = matchSearch && matchTag && matchDomain && matchOutcome;
+          card.style.display = show ? "" : "none";
+          if (show) visible++;
+        }
+
+        if (noResults) noResults.hidden = visible > 0;
+      }
+
+      searchInput.addEventListener("input", applyFilters);
+      tagSelect.addEventListener("change", applyFilters);
+      domainSelect.addEventListener("change", applyFilters);
+      outcomeSelect.addEventListener("change", applyFilters);
+    }
+  }
+</script>

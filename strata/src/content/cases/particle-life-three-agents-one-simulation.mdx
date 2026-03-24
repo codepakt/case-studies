@@ -1,0 +1,121 @@
+---
+title: "Three Agents, One Simulation"
+summary: "Three AI coding agents (Claude, Codex, Gemini) built a browser-based particle life simulation from a PRD in under 13 minutes — 15 tasks, zero merge conflicts, one post-launch fix — coordinated entirely through Codepakt's task queue."
+date: 2026-03-22
+tags: ["multi-agent", "coordination", "case-study", "codepakt", "simulation"]
+status: "published"
+domain: "engineering"
+outcome: "positive"
+premise: "Can autonomous agents share a codebase without stepping on each other?"
+author: "Sameer Joshi"
+timeline:
+  - date: "2026-03-22T17:00"
+    label: "PRD decomposed into 14 tasks"
+    description: "An agent read the particle life PRD and created 14 tasks across 5 epics: Core Simulation, Performance, Controls, Rules Matrix, Rendering. Dependencies wired automatically."
+  - date: "2026-03-22T17:05"
+    label: "First task picked up"
+    description: "Claude claimed T-001 (project scaffold). Codex and other tasks remained blocked on its completion."
+  - date: "2026-03-22T17:07"
+    label: "Parallel work begins"
+    description: "T-001 completed. Dependency resolver unlocked T-002 and T-003 simultaneously. Claude and Codex began working in parallel for the first time."
+  - date: "2026-03-22T17:09"
+    label: "Peak parallelism"
+    description: "Four tasks running concurrently — T-008, T-009, T-010, T-013 — split across Claude and Codex. No file conflicts despite both agents writing to main.js and style.css."
+  - date: "2026-03-22T17:13"
+    label: "All 14 tasks complete"
+    description: "Full simulation running: physics engine, spatial partitioning, interactive rules matrix, 5 presets, glow rendering, motion trails. Total build time: 8 minutes."
+  - date: "2026-03-22T19:46"
+    label: "Human review and approval"
+    description: "All tasks batch-approved after manual review. Simulation verified working at 60fps with 600 particles."
+  - date: "2026-03-22T19:48"
+    label: "Post-launch fix"
+    description: "T-015 created: move rules matrix panel to top-left corner. Gemini picked it up and completed it in under 3 minutes — a third agent touching the codebase for the first time with zero onboarding."
+artifacts: []
+---
+
+## Situation
+
+We needed a non-trivial case study for Codepakt — something more complex than the snake game (which two agents built in ~65 minutes), but still self-contained enough to ship as a single HTML file.
+
+Particle life fit perfectly. The simulation involves real-time physics, spatial partitioning for performance, an interactive matrix UI, preset behaviors, and canvas rendering with glow effects. It's the kind of project that tests whether agents can divide work along natural boundaries without explicit orchestration.
+
+The rules were simple: hand three agents a PRD. Let Codepakt's task queue, dependency graph, and atomic pickup handle coordination. No human intervention during the build.
+
+## Stakes
+
+This was a credibility test for Codepakt's coordination model. If agents collided on files, produced incompatible code, or couldn't resolve dependencies, it would expose the system as a toy. If it worked, we'd have proof that the "dumb server, smart agents" architecture scales beyond two-agent trivial projects.
+
+The particle life simulation also had to actually work — 60fps at 600 particles, interactive controls, emergent behavior from simple rules. A broken demo would be worse than no demo.
+
+## Constraints
+
+- **Pure HTML/CSS/JS.** No build step, no frameworks, no npm. Open `index.html` and it runs.
+- **Three files only.** `index.html`, `style.css`, `main.js`. Every agent writes to the same files.
+- **No agent communication.** Agents don't talk to each other. They only see their assigned task, the PRD, and the current file state.
+- **Codepakt v0.1 features only.** SQLite backend, CLI-based pickup, no heartbeats, no wave scheduling.
+
+## Options Considered
+
+**Option A: Sequential single-agent build**
+One agent does everything. Simplest, but proves nothing about coordination. We already knew one agent could build this.
+
+**Option B: Two agents, file-level isolation**
+Give one agent the JS, the other the CSS/HTML. Safe but artificial — real projects don't split that cleanly.
+
+**Option C: Three agents, shared files, dependency-driven scheduling**
+Let the task graph determine who works when. Agents pick up whatever's available and unblocked. The riskiest option — and the only one that tests what Codepakt actually does.
+
+## Decision
+
+Option C. Three agents, shared files, no guardrails beyond the dependency graph.
+
+Tasks were pre-assigned to balance the workload:
+- **Claude** (10 tasks): scaffold, rules matrix logic, physics engine, spatial partitioning, sliders, matrix UI, presets, visual polish, perf validation
+- **Codex** (4 tasks): particle data model, simulation loop + renderer, controls panel HTML/CSS, play/pause + randomize buttons
+- **Gemini** (1 task): post-launch UI tweak (rules matrix repositioning)
+
+## Why This Path Won
+
+The whole point of Codepakt is that you don't need to micromanage agent coordination. If we had to isolate agents to separate files or run them sequentially, we'd be proving the tool doesn't work.
+
+The dependency graph was the key bet. T-001 (scaffold) blocked everything. T-002/T-003 (data model and rules) blocked the physics engine. The physics engine blocked the renderer. Controls blocked presets. This natural ordering meant agents couldn't race ahead of each other even if they tried.
+
+## Outcome
+
+**15 tasks, 3 agents, ~13 minutes total.**
+
+| Metric | Result |
+|--------|--------|
+| Core build time (T-001 through T-014) | 8 minutes |
+| Tasks completed | 15/15 |
+| Merge conflicts | 0 |
+| Agents | 3 (Claude, Codex, Gemini) |
+| Post-launch fixes | 1 (UI repositioning) |
+| Final performance | 60fps at 600 particles |
+| Lines of code | ~630 (484 JS + 145 CSS + 40 HTML) |
+
+The simulation works. Particles cluster, orbit, chase, and self-organize depending on the rules matrix. All five presets produce visually distinct emergent behavior. The controls are responsive. The glow rendering looks good against the dark background.
+
+Gemini's late arrival on T-015 was the most interesting data point: a third agent, with no prior context, picked up a UI task and completed it in under 3 minutes. The task description and current file state were sufficient. No onboarding, no handoff document, no context transfer.
+
+## What We Got Wrong
+
+1. **Event log misattribution.** The events table records whichever agent calls the completion API, not the agent who did the work. Claude reviewed and closed Codex's tasks, so the event log shows Claude completing all 15 tasks. The `assignee` field on tasks is the only reliable source of truth. This is a bug that needs fixing in the CLI — it makes audit trails misleading.
+
+2. **Pre-assignment limits flexibility.** Tasks were assigned to specific agents upfront. In a real workflow, you'd want agents to self-select based on availability and capability. Codepakt supports this (any agent can pick up unassigned tasks), but we didn't test it here.
+
+3. **Single-file bottleneck.** All JS lives in one `main.js`. With more agents, this would create contention. A real project would need module boundaries — but the constraint was "no build step," so bundling wasn't an option.
+
+## Open Questions
+
+- Would the same coordination hold with 5+ agents on a project with 50+ files?
+- How does the model break when two agents edit the same function simultaneously? Codepakt prevents double-pickup of the same task, but not same-file edits across different tasks.
+- Should the event log record both the implementer and the reviewer as separate fields?
+- Is pre-assignment the right default, or should agents compete for tasks based on declared capabilities?
+
+## Key Takeaways
+
+- **Dependency graphs are sufficient coordination.** No message passing, no negotiation, no shared memory between agents. The task graph plus atomic pickup was enough to prevent conflicts on a 15-task, 3-agent, shared-file project.
+- **Late-joining agents work.** Gemini arrived hours after the initial build, had zero context, and completed a task in minutes. The task description + current file state is enough onboarding.
+- **Audit trails matter more than you think.** The event log bug (misattributing work to the reviewer) would have produced a completely wrong case study if we hadn't cross-referenced the assignee field. Observability is a feature, not a nice-to-have.
+- **The ceiling isn't coordination — it's file contention.** Three agents writing to one JS file worked because the dependency graph serialized their access. At higher agent counts or with less structured dependencies, file-level conflicts become the bottleneck, not task-level conflicts.

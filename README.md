@@ -16,6 +16,12 @@ Three agents (Claude Code + OpenAI Codex + Google Gemini) build a browser-based 
 
 **Agents:** claude, codex, gemini | **Tasks:** 15 | **Time:** ~13 min | **Stack:** Pure HTML/CSS/JS
 
+### [strata/](strata/)
+
+Two agents (Claude Code + OpenAI Codex) build a full editorial case study archive — Astro + MDX web app with content collections, Zod schema validation, search, filters, and responsive reading experience. The most complex case study: 11 source files, ~1,200 lines of code, from a 291-line PRD.
+
+**Agents:** claude, codex | **Tasks:** 15 | **Time:** ~30 min | **Stack:** Astro 5, MDX, TypeScript
+
 ---
 
 *More case studies coming. Try codepakt yourself: `npm i -g codepakt`*

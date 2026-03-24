@@ -1,0 +1,32 @@
+---
+import SiteHeader from "../components/SiteHeader.astro";
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "Strata",
+  description = "Narrative archive for consequential product, engineering, research, and business decisions."
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+  </head>
+  <body>
+    <div class="shell">
+      <SiteHeader />
+      <main class="page">
+        <slot />
+      </main>
+    </div>
+  </body>
+</html>

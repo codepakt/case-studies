@@ -1,0 +1,66 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="About Strata"
+  description="Strata preserves the reasoning, constraints, and downstream effects behind consequential decisions."
+>
+  <section class="case-header">
+    <p class="eyebrow">About</p>
+    <h1>Why Strata exists</h1>
+    <p class="case-header__summary">
+      Most case studies are shallow. They describe outputs, not decisions. They erase uncertainty
+      and rejected paths. They flatten timelines into a fake linear story. Strata exists to fix that.
+    </p>
+  </section>
+
+  <section class="case-body">
+    <h2>The problem with most case studies</h2>
+    <p>
+      Conventional case studies optimize for presentation over reasoning. They tell you what shipped
+      but not what was considered. They show the final answer but hide the constraints that shaped it.
+      They make every outcome look inevitable.
+    </p>
+    <p>
+      This creates a real gap: teams and individuals lose the ability to study decision quality over time.
+      When you can't inspect how a decision was made, you can't learn from it, challenge it, or
+      recognize when the same mistake is happening again.
+    </p>
+
+    <h2>The Strata framework</h2>
+    <p>
+      Every case study in Strata follows a structured narrative that preserves decision context:
+    </p>
+    <ul>
+      <li><strong>Situation</strong> — what was happening and what triggered the need for a decision</li>
+      <li><strong>Stakes</strong> — what was at risk and why the decision mattered</li>
+      <li><strong>Constraints</strong> — the limitations that shaped the decision space</li>
+      <li><strong>Options Considered</strong> — what alternatives were on the table</li>
+      <li><strong>Decision</strong> — what the team chose</li>
+      <li><strong>Why This Path Won</strong> — the reasoning behind the choice</li>
+      <li><strong>Outcome</strong> — what happened after the decision shipped</li>
+      <li><strong>What We Got Wrong</strong> — where the reasoning was flawed</li>
+      <li><strong>Open Questions</strong> — what remains unresolved</li>
+      <li><strong>Key Takeaways</strong> — generalizable lessons</li>
+    </ul>
+
+    <h2>Principles</h2>
+    <p>
+      <strong>Structure without sterility.</strong> The framework enforces a strong narrative skeleton
+      but still allows expressive writing. The goal is to guide reflection, not to create forms.
+    </p>
+    <p>
+      <strong>Decisions over deliverables.</strong> The unit of value is the decision story, not the
+      shipped artifact. What was built matters less than how the team reasoned about what to build.
+    </p>
+    <p>
+      <strong>Honesty is a feature.</strong> Sections about uncertainty, failure, and revised beliefs
+      are mandatory. A case study that only reports success is incomplete.
+    </p>
+    <p>
+      <strong>Time matters.</strong> Before-and-after context is explicit. Timelines show how
+      decisions evolved. Outcomes are measured after the dust settles, not at launch.
+    </p>
+  </section>
+</BaseLayout>

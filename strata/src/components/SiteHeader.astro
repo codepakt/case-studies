@@ -1,0 +1,23 @@
+---
+const navItems = [
+  { href: "/", label: "Archive" },
+  { href: "/about", label: "About" }
+];
+---
+
+<header class="site-header">
+  <a class="site-mark" href="/">
+    <span class="site-mark__eyebrow">Decision archive</span>
+    <span class="site-mark__title">Strata</span>
+  </a>
+
+  <nav aria-label="Primary">
+    <ul class="site-nav">
+      {navItems.map((item) => (
+        <li>
+          <a href={item.href}>{item.label}</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</header>

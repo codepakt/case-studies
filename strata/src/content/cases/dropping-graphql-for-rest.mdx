@@ -1,0 +1,105 @@
+---
+title: "Dropping GraphQL for REST"
+summary: "After eighteen months of running a GraphQL gateway, the team reversed course and migrated back to REST. This is the story of how a technically superior tool became an operational liability."
+date: 2024-11-15
+tags: ["api-design", "architecture", "migration"]
+status: "published"
+domain: "engineering"
+outcome: "positive"
+premise: "A GraphQL gateway that cost more than it saved."
+author: "Strata editorial team"
+timeline:
+  - date: "2023-03"
+    label: "GraphQL adopted"
+    description: "Team chose Apollo Federation for the new checkout service. Initial velocity was high."
+  - date: "2023-08"
+    label: "First incidents"
+    description: "N+1 query patterns started hitting the database hard during peak traffic. Dataloader helped but introduced caching bugs."
+  - date: "2024-01"
+    label: "Internal audit"
+    description: "Platform team ran a cost-of-ownership analysis. GraphQL gateway accounted for 40% of API team's on-call pages."
+  - date: "2024-04"
+    label: "Migration decision"
+    description: "Engineering leadership approved a phased migration back to REST with OpenAPI contracts."
+  - date: "2024-11"
+    label: "Migration complete"
+    description: "Final GraphQL endpoint deprecated. On-call pages dropped 62% in the following quarter."
+artifacts:
+  - src: "/artifacts/graphql-oncall-chart.svg"
+    alt: "On-call page frequency before and after migration"
+    caption: "Weekly on-call pages dropped from ~18 to ~7 after the REST migration completed."
+  - src: "/artifacts/api-latency-comparison.svg"
+    alt: "P95 latency comparison between GraphQL and REST endpoints"
+    caption: "REST endpoints consistently showed lower P95 latency due to simpler query execution paths."
+---
+
+## Situation
+
+The checkout team needed a new API layer to serve a redesigned storefront. The existing REST endpoints had grown organically over three years — inconsistent naming, no schema validation, and heavy over-fetching by the mobile clients.
+
+GraphQL seemed like the right fit: typed schemas, client-driven queries, and a single gateway to replace dozens of endpoints.
+
+## Stakes
+
+The storefront redesign was the company's largest revenue initiative of the year. If the API layer couldn't handle Black Friday traffic, the business impact would be measured in millions. At the same time, the team was under pressure to ship the new storefront in under six months.
+
+Choosing the wrong API architecture would either slow the launch or create operational debt that compounded during the highest-traffic period of the year.
+
+## Constraints
+
+- The mobile team needed flexible queries — different screens fetched different subsets of product data.
+- The backend was a mix of PostgreSQL and a legacy inventory service with unpredictable latency.
+- The team had three backend engineers, none with prior GraphQL production experience.
+- There was no dedicated platform team to own the gateway long-term.
+
+## Options Considered
+
+**Option A: GraphQL Federation (Apollo)**
+Pros: flexible client queries, typed schema, strong ecosystem. Cons: operational complexity, learning curve, N+1 risk.
+
+**Option B: REST with OpenAPI**
+Pros: team familiarity, simpler debugging, better caching. Cons: over-fetching without custom endpoints per screen.
+
+**Option C: BFF pattern (Backend for Frontend)**
+Pros: tailored responses per client. Cons: code duplication, more services to maintain.
+
+## Decision
+
+The team chose **Option A — GraphQL Federation** based on the schema benefits and the promise of reduced over-fetching for mobile clients. The CTO supported the choice as a "platform investment."
+
+## Why This Path Won
+
+GraphQL addressed the loudest pain point: the mobile team was frustrated with over-fetching and wanted query flexibility. The typed schema was appealing to a team tired of unversioned REST endpoints. Apollo Federation's marketing positioned it as the natural evolution for multi-service architectures.
+
+There was also an element of resume-driven development — the team was excited to work with a technology they'd been reading about.
+
+## Outcome
+
+The migration back to REST was completed in November 2024. Results after one quarter:
+
+- On-call pages dropped 62%.
+- P95 API latency improved by 35%.
+- New endpoint development time decreased — engineers stopped spending cycles on resolver optimization and dataloader tuning.
+- Mobile team adapted to BFF-style REST endpoints with minimal friction.
+
+The GraphQL experiment wasn't wasted — it forced the team to think seriously about schema contracts, which carried over into their OpenAPI workflow.
+
+## What We Got Wrong
+
+1. **Underestimated operational cost.** The team treated GraphQL as "just another API framework" instead of a fundamentally different operational model. Query complexity analysis, rate limiting, and caching all required custom solutions.
+
+2. **Confused developer experience with production readiness.** GraphQL's development-time experience (Playground, introspection, typed codegen) was excellent. But production concerns — observability, cost attribution, N+1 prevention — required significantly more investment.
+
+3. **Ignored team expertise.** Three engineers learning GraphQL in production, under a deadline, with no platform support was a setup for incidents.
+
+## Open Questions
+
+- Would GraphQL have worked with a dedicated platform team owning the gateway?
+- Is the BFF pattern the team landed on just a less-principled version of what GraphQL was trying to solve?
+- Should the team have invested in a query complexity budget instead of abandoning GraphQL entirely?
+
+## Key Takeaways
+
+- Technology choices are team-shaped, not just architecture-shaped. The best tool for a team with deep expertise is different from the best tool for a team learning on the job.
+- Operational cost is the hidden variable in architecture decisions. Development velocity is easy to measure; on-call burden compounds silently.
+- Reversing a decision is not failure — it's evidence that the team can update beliefs when new information arrives.

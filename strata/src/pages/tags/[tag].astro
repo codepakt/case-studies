@@ -1,0 +1,57 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+export async function getStaticPaths() {
+  const cases = await getCollection("cases", ({ data }) => data.status !== "draft");
+  const tags = [...new Set(cases.flatMap((c) => c.data.tags))];
+  return tags.map((tag) => ({
+    params: { tag },
+    props: {
+      tag,
+      cases: cases
+        .filter((c) => c.data.tags.includes(tag))
+        .sort((a, b) => b.data.date.getTime() - a.data.date.getTime()),
+    },
+  }));
+}
+
+const { tag, cases } = Astro.props;
+---
+
+<BaseLayout title={`${tag} — Strata`} description={`Case studies tagged "${tag}".`}>
+  <section class="case-header">
+    <p class="eyebrow">Tag</p>
+    <h1>{tag}</h1>
+    <p class="case-header__summary">
+      {cases.length} case {cases.length === 1 ? "study" : "studies"} tagged "{tag}".
+    </p>
+  </section>
+
+  <section class="archive" aria-label="Filtered case studies">
+    {cases.map((c) => (
+      <a href={`/case/${c.id}/`} class="card">
+        <div class="card__meta">
+          <time datetime={c.data.date.toISOString().slice(0, 10)}>
+            {c.data.date.toLocaleDateString("en-US", { year: "numeric", month: "short" })}
+          </time>
+          <span class="card__domain">{c.data.domain}</span>
+          <span class={`card__status card__status--${c.data.status}`}>{c.data.status}</span>
+          <span class={`card__outcome card__outcome--${c.data.outcome}`}>{c.data.outcome}</span>
+        </div>
+        <h2 class="card__title">{c.data.title}</h2>
+        {c.data.premise && <p class="card__premise">{c.data.premise}</p>}
+        <p class="card__summary">{c.data.summary}</p>
+        <ul class="card__tags">
+          {c.data.tags.map((t) => (
+            <li>{t}</li>
+          ))}
+        </ul>
+      </a>
+    ))}
+  </section>
+
+  <footer class="case-footer">
+    <a href="/">&larr; Back to archive</a>
+  </footer>
+</BaseLayout>
