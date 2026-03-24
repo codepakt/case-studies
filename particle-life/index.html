@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Particle Life</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+
+  <div id="rules-matrix" class="matrix-panel"></div>
+
+  <details class="controls-panel" open>
+    <summary>Controls</summary>
+    <div class="controls-grid">
+      <button type="button" id="btn-pause">Pause</button>
+      <button type="button" id="btn-randomize">Randomize</button>
+
+      <div id="presets" class="presets-row" style="grid-column: 1 / -1; display: flex; gap: 0.4rem; flex-wrap: wrap;"></div>
+
+      <label>
+        <span>Speed <output id="val-speed">1</output></span>
+        <input type="range" id="slider-speed" min="1" max="5" value="1" step="1">
+      </label>
+
+      <label>
+        <span>Particles <output id="val-count">600</output></span>
+        <input type="range" id="slider-count" min="200" max="1000" value="600" step="10">
+      </label>
+
+      <label>
+        <span>Friction <output id="val-friction">0.50</output></span>
+        <input type="range" id="slider-friction" min="0.30" max="0.99" value="0.50" step="0.01">
+      </label>
+    </div>
+  </details>
+  <script src="main.js"></script>
+</body>
+</html>
